@@ -1,62 +1,106 @@
+/* Reset some basics */
+* {
+  box-sizing: border-box;
+}
+
 body {
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  background-color: #1e1e1e;
-  color: #d4d4d4;
+  background-color: #121212;
+  color: #e0e0e0;
   padding: 20px;
+  margin: 0;
+  min-height: 100vh;
 }
 
 h1 {
-  color: #569cd6;
+  color: #61dafb;
+  font-weight: 600;
+  margin-bottom: 1rem;
 }
 
 textarea {
   width: 100%;
-  background-color: #252526;
-  color: #d4d4d4;
-  border: 1px solid #3c3c3c;
-  padding: 10px;
+  max-width: 900px;
+  height: 150px;
+  background-color: #1e1e1e;
+  color: #e0e0e0;
+  border: 1px solid #333;
+  border-radius: 6px;
+  padding: 12px;
   font-family: monospace;
-  font-size: 14px;
+  font-size: 16px;
   resize: vertical;
+  transition: border-color 0.3s ease;
+}
+
+textarea:focus {
+  outline: none;
+  border-color: #61dafb;
+  background-color: #282828;
 }
 
 button {
-  background-color: #0e639c;
-  color: white;
+  background-color: #61dafb;
+  color: #121212;
   border: none;
-  padding: 10px 20px;
-  margin-top: 10px;
+  padding: 12px 28px;
+  margin-top: 15px;
+  font-size: 16px;
+  border-radius: 6px;
   cursor: pointer;
-  font-size: 14px;
-  border-radius: 3px;
+  font-weight: 600;
+  transition: background-color 0.3s ease;
 }
 
-button:hover {
-  background-color: #1177bb;
+button:disabled {
+  background-color: #444;
+  cursor: not-allowed;
+  color: #888;
+}
+
+button:hover:not(:disabled) {
+  background-color: #21a1f1;
 }
 
 table {
-  margin-top: 20px;
+  margin-top: 30px;
   width: 100%;
+  max-width: 900px;
   border-collapse: collapse;
   background-color: #1e1e1e;
+  border-radius: 6px;
+  overflow: hidden;
+  box-shadow: 0 0 15px rgba(0,0,0,0.5);
 }
 
 th, td {
-  padding: 10px;
-  border: 1px solid #3c3c3c;
+  padding: 14px 18px;
+  border-bottom: 1px solid #333;
   text-align: left;
+  font-size: 15px;
 }
 
 th {
-  background-color: #2d2d2d;
-  color: #dcdcaa;
+  background-color: #282828;
+  color: #61dafb;
+  font-weight: 600;
 }
 
-tr:nth-child(even) {
-  background-color: #252526;
+tbody tr:nth-child(even) {
+  background-color: #2a2a2a;
 }
 
-tr:hover {
-  background-color: #333333;
+tbody tr:hover {
+  background-color: #3a3a3a;
 }
+
+a {
+  color: #61dafb;
+  text-decoration: none;
+  word-break: break-all;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
