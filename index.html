@@ -3,16 +3,23 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Link Checker</title>
-  <link rel="stylesheet" href="style.css">
+  <title>Static Link Checker</title>
+  <style>
+    body { font-family: Arial, sans-serif; padding: 20px; }
+    textarea { width: 100%; max-width: 800px; }
+    table { width: 100%; max-width: 800px; border-collapse: collapse; margin-top: 20px; }
+    th, td { padding: 8px; border: 1px solid #ccc; text-align: left; }
+    th { background-color: #f0f0f0; }
+    button:disabled { background-color: #ccc; cursor: not-allowed; }
+  </style>
 </head>
 <body>
   <h1>Static Link Checker</h1>
 
-  <textarea id="urlInput" rows="10" cols="60" placeholder="Enter one URL per line..."></textarea><br/>
-  <button onclick="checkLinks()">Check Links</button>
+  <textarea id="urlInput" rows="10" placeholder="Enter one URL per line..."></textarea><br/>
+  <button id="checkBtn" onclick="checkLinks()">Check Links</button>
 
-  <table id="resultsTable" border="1">
+  <table id="resultsTable">
     <thead>
       <tr>
         <th>URL</th>
@@ -23,8 +30,138 @@
     </thead>
     <tbody></tbody>
   </table>
+  <script>
+ const knownGoodDomains = [
+  "google.com", "youtube.com", "youtu.be", "facebook.com", "twitter.com",
+  "instagram.com", "wikipedia.org", "amazon.com", "reddit.com", "linkedin.com",
+  "netflix.com", "yahoo.com", "bing.com", "whatsapp.com", "live.com", "office.com",
+  "apple.com", "microsoft.com", "vk.com", "baidu.com", "zoom.us", "tiktok.com",
+  "ebay.com", "pinterest.com", "stackoverflow.com", "wordpress.com", "github.com",
+  "github.io", "quora.com", "dropbox.com", "salesforce.com", "adobe.com", "paypal.com",
+  "walmart.com", "cnn.com", "bbc.com", "nytimes.com", "espn.com", "imdb.com",
+  "booking.com", "tripadvisor.com", "airbnb.com", "uber.com", "lyft.com", "slack.com",
+  "mozilla.org", "wordpress.org", "medium.com", "vimeo.com", "soundcloud.com",
+  "spotify.com", "twitch.tv", "stripe.com", "duckduckgo.com", "etsy.com", "target.com",
+  "bestbuy.com", "homedepot.com", "costco.com", "nbc.com", "foxnews.com", "weather.com",
+  "accuweather.com", "hulu.com", "disneyplus.com", "nih.gov", "cdc.gov", "who.int",
+  "imgur.com", "flickr.com", "canva.com", "trello.com", "notion.so", "asana.com",
+  "skype.com", "teams.microsoft.com", "calendar.google.com", "drive.google.com",
+  "docs.google.com", "sheets.google.com", "slides.google.com", "photos.google.com",
+  "translate.google.com", "play.google.com", "maps.google.com", "news.google.com",
+  "gmail.com", "outlook.com", "yandex.ru", "ok.ru", "aliexpress.com", "taobao.com",
+  "tmall.com", "jd.com", "tmz.com", "buzzfeed.com", "forbes.com", "bloomberg.com",
+  "cnbc.com", "indeed.com", "glassdoor.com", "monster.com", "healthline.com",
+  "webmd.com", "mayoclinic.org", "chase.com", "bankofamerica.com", "wellsfargo.com",
+  "venmo.com", "coinbase.com", "binance.com", "kraken.com", "discord.com", "chatgpt.com",
+  "etsy.com", "zoho.com", "salesforce.com", "zendesk.com", "jira.com", "confluence.com",
+  "asana.com", "notion.so", "evernote.com", "todoist.com", "slack.com", "microsoftteams.com",
+  "zoom.us", "skype.com", "wechat.com", "telegram.org", "signal.org", "viber.com",
+  "line.me", "kik.com", "snapchat.com", "pinboard.in", "getpocket.com", "instapaper.com",
+  "medium.com", "substack.com", "ghost.org", "blogger.com", "tumblr.com", "squarespace.com",
+  "wix.com", "weebly.com", "shopify.com", "bigcommerce.com", "magento.com", "woocommerce.com",
+  "stripe.com", "paypal.com", "authorize.net", "squareup.com", "adyen.com", "klarna.com",
+  "afterpay.com", "sofort.com", "giropay.com", "skrill.com", "neteller.com", "venmo.com",
+  "cashapp.com", "zellepay.com", "applepay.com", "googlepay.com", "samsungpay.com",
+  "alipay.com", "wechatpay.com", "paytm.com", "razorpay.com", "mollie.com", "worldpay.com",
+  "paypal.com", "intuit.com", "freshbooks.com", "xero.com", "quickbooks.intuit.com",
+  "waveapps.com", "zoho.com", "sage.com", "turboTax.intuit.com", "hloom.com", "template.net",
+  "canva.com", "picmonkey.com", "fotor.com", "pixlr.com", "be.net", "dribbble.com",
+  "behance.net", "99designs.com", "upwork.com", "fiverr.com", "freelancer.com",
+  "peopleperhour.com", "crowdsource.com", "toptal.com", "guru.com", "remoteok.io",
+  "weworkremotely.com", "remotive.io", "angel.co", "venturebeat.com", "techcrunch.com",
+  "theverge.com", "wired.com", "engadget.com", "gizmodo.com", "arstechnica.com",
+  "thenextweb.com", "zdnet.com", "cnet.com", "tomshardware.com", "pcmag.com",
+  "ign.com", "gamespot.com", "polygon.com", "kotaku.com", "metacritic.com",
+  "rottentomatoes.com", "goodreads.com", "librarything.com", "bookbub.com",
+  "projectgutenberg.org", "archive.org", "openlibrary.org", "ifttt.com", "zapier.com",
+  "ifunny.co", "9gag.com", "cheezburger.com", "thechive.com", "boredpanda.com",
+  "mentalfloss.com", "howstuffworks.com", "lifehacker.com", "gobankingrates.com",
+  "bankrate.com", "nerdwallet.com", "mint.com", "personalcapital.com", "mybanktracker.com",
+  "creditkarma.com", "petfinder.com", "akc.org", "thedodo.com", "nationalgeographic.com",
+  "discovery.com", "smithsonianmag.com", "pbs.org", "history.com", "ancient.eu",
+  "britannica.com", "coursera.org", "edx.org", "udemy.com", "khanacademy.org",
+  "lynda.com", "skillshare.com", "masterclass.com", "codecademy.com", "freecodecamp.org",
+  "udacity.com", "pluralsight.com", "treehouse.com", "sololearn.com", "duolingo.com",
+  "babbel.com", "rosettaatene.com", "memrise.com", "busuu.com", "linguee.com",
+  "wordreference.com", "thesaurus.com", "dictionary.com", "merriam-webster.com",
+  "oxforddictionaries.com", "w3schools.com", "mdn.mozilla.org", "developer.mozilla.org",
+  "stackoverflow.com", "github.com", "gitlab.com", "bitbucket.org", "codepen.io",
+  "jsfiddle.net", "repl.it", "glitch.com", "heroku.com", "netlify.com",
+  "vercel.com", "aws.amazon.com", "azure.microsoft.com", "cloud.google.com",
+  "digitalocean.com", "linode.com", "rackspace.com", "ovh.com", "ibm.com",
+  "oracle.com", "vmware.com", "docker.com", "kubernetes.io", "ansible.com",
+  "chef.io", "puppet.com", "jenkins.io", "circleci.com", "travis-ci.org",
+  "githubactions.com", "gitlab-ci.org", "bitrise.com", "appveyor.com",
+  "saucelabs.com", "browserstack.com", "postman.com", "swagger.io", "apigee.com",
+  "mulesoft.com", "konghq.com", "wso2.com", "istio.io", "grafana.com",
+  "prometheus.io", "datadog.com", "newrelic.com", "splunk.com", "loggly.com",
+  "papertrail.com", "sumologic.com", "pagerduty.com", "opsgenie.com", "statuspage.io",
+  "uptimerobot.com", "pingdom.com", "nagios.org", "zabbix.com", "splunk.com",
+  "elastic.co", "logstash.net", "kibana.com", "beats.elastic.co", "filebeat.com",
+  "metricbeat.com", "heartbeats.io", "fluentd.org", "fluentbit.io", "graylog.org",
+  "sentry.io", "raygun.com", "bugsnag.com", "rollbar.com", "bugherd.com",
+  "errorsnag.io", "airbrake.io", "newrelic.com", "appdynamics.com", "datadog.com",
+  "instana.com", "dynatrace.com", "splunk.com", "sumologic.com"
+];
+    function sanitizeURL(raw) {
+      try {
+        return new URL(raw).href;
+      } catch {
+        try {
+          return new URL('http://' + raw).href;
+        } catch {
+          return null;
+        }
+      }
+    }
 
-  <script src="main.js"></script>
+    function getDomain(url) {
+      try {
+        const parsed = new URL(url);
+        return parsed.hostname.replace(/^www\./, '').toLowerCase();
+      } catch {
+        return '';
+      }
+    }
+
+    async function fetchStatus(url) {
+      try {
+        const res = await fetch(url, { method: 'HEAD', mode: 'no-cors' });
+        return res.status || 'unknown';
+      } catch {
+        return 'error';
+      }
+    }
+
+    async function checkLinks() {
+      const checkBtn = document.getElementById("checkBtn");
+      checkBtn.disabled = true;
+
+      const input = document.getElementById("urlInput").value.trim();
+      const rawLines = input.split("\n").map(line => line.trim()).filter(Boolean);
+      const tableBody = document.querySelector("#resultsTable tbody");
+      tableBody.innerHTML = '';
+
+      for (const raw of rawLines) {
+        const link = sanitizeURL(raw);
+        if (!link) continue;
+
+        const domain = getDomain(link);
+        const isKnown = knownGoodDomains.some(good => domain.endsWith(good));
+        const status = await fetchStatus(link);
+
+        const row = document.createElement("tr");
+        row.innerHTML = `
+          <td><a href="${link}" target="_blank">${link}</a></td>
+          <td style="color:${isKnown ? 'green' : 'red'}">${isKnown ? 'Yes' : 'No'}</td>
+          <td>${status}</td>
+          <td>${status === 'error' ? 'Failed to fetch' : 'Success or CORS blocked'}</td>
+        `;
+        tableBody.appendChild(row);
+      }
+
+      checkBtn.disabled = false;
+    }
+  </script>
 </body>
 </html>
-
